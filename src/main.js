@@ -4,7 +4,9 @@
 const assets = require('assets')
 const clipboard = require('clipboard')
 
-function copyUnoAssetsColors(transformCopyValue) {
+const CSS_VAR_PREFIX = '--color-'
+
+function copyUnoAssetsColors(transformerConfig) {
   /** @type {AssetsColor[]} */
   const allAssetsColors = assets.colors.get()
 
@@ -13,8 +15,15 @@ function copyUnoAssetsColors(transformCopyValue) {
     return
   }
 
-  const copyTextList = []
+  const {
+    transformCopyValue,
+    transformCopyText,
+  } = transformerConfig || {}
+
   const copyValueTransformer = typeof transformCopyValue === 'function' ? transformCopyValue : toUnoColorValue
+  const copyTextTransformer = typeof transformCopyText === 'function' ? transformCopyText : null
+  const copyTextList = []
+  const unmatchAssetColorNameList = []
 
   allAssetsColors.forEach(({
     name,
@@ -23,22 +32,39 @@ function copyUnoAssetsColors(transformCopyValue) {
     colorStops,
   }) => {
     const [, colorName] = name?.match(/^([A-z]+\d+).*$/) || []
-    if (!colorName) return
+    if (!colorName) {
+      unmatchAssetColorNameList.push(name)
+      return
+    }
 
     if (color) {
       const key = colorName
-      copyTextList.push(`${key}: ${copyValueTransformer(key, color)}, // ${name}`)
+      if (copyTextTransformer) {
+        copyTextList.push(copyTextTransformer(key, color))
+      } else {
+        copyTextList.push(`${key}: ${copyValueTransformer(key, color)}, // ${name}`)
+      }
     } else if (gradientType) {
       colorStops.forEach((f, i) => {
         const { color } = f
         const key = `${colorName}_${i + 1}`
-        copyTextList.push(`${key}: ${copyValueTransformer(key, color)}, // ${name}`)
+        if (copyTextTransformer) {
+          copyTextList.push(copyTextTransformer(key, color))
+        } else {
+          copyTextList.push(`${key}: ${copyValueTransformer(key, color)}, // ${name}`)
+        }
       })
     }
   })
 
   if (!copyTextList.length) {
     showAlert('未匹配到任何可以複製的顏色！')
+    return
+  }
+
+  if (unmatchAssetColorNameList.length > 0) {
+    console.log(unmatchAssetColorNameList.join('\n'))
+    showAlert(`複製的顏色數量有缺漏，缺少：${unmatchAssetColorNameList.length}筆 (匹配失敗的名字列表印在 log 裡)`)
     return
   }
 
@@ -52,9 +78,21 @@ function copyUnoAssetsColors(transformCopyValue) {
 }
 
 function copyUnoVarValAssetsColors() {
-  copyUnoAssetsColors(
-    (key) => `'var(--color-${key})'`
-  )
+  copyUnoAssetsColors({
+    transformCopyValue: (key) => `'var(${CSS_VAR_PREFIX}${key})'`,
+  })
+}
+
+function copyCssVarAssetsColors() {
+  copyUnoAssetsColors({
+    transformCopyText: (key, color) => {
+      if (color.a == null || color.a === 255) {
+        return `${CSS_VAR_PREFIX}${key}: ${color.toHex(true)};`
+      }
+
+      return `${CSS_VAR_PREFIX}${key}: rgba(${color.r}, ${color.g}, ${color.b}, ${alphaToPercentage(color.a) / 100});`
+    },
+  })
 }
 
 function toUnoColorValue (key, color) {
@@ -115,5 +153,6 @@ module.exports = {
   commands: {
     copyUnoAssetsColors,
     copyUnoVarValAssetsColors,
+    copyCssVarAssetsColors,
   },
 }
