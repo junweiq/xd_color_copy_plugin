@@ -4,7 +4,7 @@
 const assets = require('assets')
 const clipboard = require('clipboard')
 
-function copyUnoAssetsColors() {
+function copyUnoAssetsColors(transformCopyValue) {
   /** @type {AssetsColor[]} */
   const allAssetsColors = assets.colors.get()
 
@@ -14,6 +14,7 @@ function copyUnoAssetsColors() {
   }
 
   const copyTextList = []
+  const copyValueTransformer = typeof transformCopyValue === 'function' ? transformCopyValue : toUnoColorValue
 
   allAssetsColors.forEach(({
     name,
@@ -25,11 +26,13 @@ function copyUnoAssetsColors() {
     if (!colorName) return
 
     if (color) {
-      copyTextList.push(`${colorName}: ${toOldUnoColorValue(color)}, // ${name}`)
+      const key = colorName
+      copyTextList.push(`${key}: ${copyValueTransformer(key, color)}, // ${name}`)
     } else if (gradientType) {
       colorStops.forEach((f, i) => {
         const { color } = f
-        copyTextList.push(`${colorName}_${i + 1}: ${toOldUnoColorValue(color)}, // ${name}`)
+        const key = `${colorName}_${i + 1}`
+        copyTextList.push(`${key}: ${copyValueTransformer(key, color)}, // ${name}`)
       })
     }
   })
@@ -48,7 +51,13 @@ function copyUnoAssetsColors() {
   showAlert('顏色已成功複製到剪貼簿！')
 }
 
-function toOldUnoColorValue (color) {
+function copyUnoVarValAssetsColors() {
+  copyUnoAssetsColors(
+    (key) => `'var(--color-${key})'`
+  )
+}
+
+function toUnoColorValue (key, color) {
   const hexColor = color.toHex(true)
   if (color.a == null || color.a === 255) return `'${hexColor}'`
   return `rgba('${hexColor}', ${alphaToPercentage(color.a) / 100})`
@@ -105,5 +114,6 @@ function sortColorNameList (colorNameList, {
 module.exports = {
   commands: {
     copyUnoAssetsColors,
+    copyUnoVarValAssetsColors,
   },
 }

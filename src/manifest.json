@@ -15,6 +15,11 @@
       "type": "menu",
       "label": "複製 Unocss 格式顏色",
       "commandId": "copyUnoAssetsColors"
+    },
+    {
+      "type": "menu",
+      "label": "複製 Unocss var_val 格式顏色",
+      "commandId": "copyUnoVarValAssetsColors"
     }
   ]
 }
