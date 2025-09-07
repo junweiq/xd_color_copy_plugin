@@ -1,0 +1,33 @@
+{
+  "name": "xd_color_copy_plugin",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.12.3",
+  "scripts": {
+    "script:sync-xd-plugin": "tsx ./script/sync-xd-plugin.ts --watch --dir C:\\Users\\COSH\\AppData\\Local\\Packages\\Adobe.XD_pc75e8sa7ep4e\\LocalState\\develop"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/junweiq/xd_color_copy_plugin.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/junweiq/xd_color_copy_plugin/issues"
+  },
+  "homepage": "https://github.com/junweiq/xd_color_copy_plugin#readme",
+  "description": "",
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "fs-extra": "^11.3.0",
+    "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^24.1.0",
+    "@types/yargs": "^17.0.33",
+    "tsx": "^4.20.3"
+  }
+}
