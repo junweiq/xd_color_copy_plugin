@@ -63,7 +63,9 @@ function copyUnoAssetsColors(transformerConfig) {
   }
 
   if (unmatchAssetColorNameList.length > 0) {
+    console.log('↓ ------ 缺少的顏色名稱們 ------ ↓')
     console.log(unmatchAssetColorNameList.join('\n'))
+    console.log('↑ ------ 缺少的顏色名稱們 ------ ↑')
     showAlert(`複製的顏色數量有缺漏，缺少：${unmatchAssetColorNameList.length}筆 (匹配失敗的名字列表印在 log 裡)`)
     return
   }
